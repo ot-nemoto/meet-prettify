@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   addEntry,
   applyEdit,
+  deleteEntry,
   parseMeetHtml,
   type CaptionEntry,
 } from "@/lib/parseMeetHtml";
@@ -132,6 +133,12 @@ export default function Home() {
 
   const handleAddCancel = () => {
     setIsAdding(false);
+  };
+
+  const handleDelete = (index: number) => {
+    setEntries((prev) => deleteEntry(prev, index));
+    if (editingIndex === index) setEditingIndex(null);
+    if (isAdding && addAfterIndex === index) setIsAdding(false);
   };
 
   const toDisplayName = (speaker: string) =>
@@ -270,7 +277,7 @@ export default function Home() {
                         <div className="rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-gray-800 shadow-sm">
                           {entry.text}
                         </div>
-                        <div className="absolute -right-14 top-1/2 flex -translate-y-1/2 gap-1">
+                        <div className="absolute -right-20 top-1/2 flex -translate-y-1/2 gap-1">
                           <button
                             type="button"
                             aria-label="編集"
@@ -286,6 +293,14 @@ export default function Home() {
                             onClick={() => handleAddStart(i)}
                           >
                             ➕
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="削除"
+                            className="text-gray-300 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+                            onClick={() => handleDelete(i)}
+                          >
+                            🗑️
                           </button>
                         </div>
                       </div>

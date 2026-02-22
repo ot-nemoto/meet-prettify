@@ -48,6 +48,16 @@ export function applyEdit(
 }
 
 /**
+ * 指定インデックスのエントリを除いた新しい配列を返す。
+ */
+export function deleteEntry(
+  entries: CaptionEntry[],
+  index: number,
+): CaptionEntry[] {
+  return entries.filter((_, i) => i !== index);
+}
+
+/**
  * 新しいエントリを insertAfterIndex の直後に挿入した新しい配列を返す。
  * insertAfterIndex が null の場合は末尾に追加する。
  * speaker または text がトリム後に空になる場合は元の配列をそのまま返す。

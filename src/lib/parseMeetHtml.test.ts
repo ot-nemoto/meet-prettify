@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addEntry, applyEdit, parseMeetHtml } from "./parseMeetHtml";
+import { addEntry, applyEdit, deleteEntry, parseMeetHtml } from "./parseMeetHtml";
 
 // aria-label="字幕" 内に1件のエントリを持つ最小 HTML を生成するヘルパー
 function makeHtml(entries: { speaker: string; text: string }[]): string {
@@ -50,6 +50,44 @@ describe("applyEdit", () => {
 
   it("元の配列は変更されない（イミュータブル）", () => {
     applyEdit(base, 0, "変更後");
+    expect(base[0].text).toBe("こんにちは");
+  });
+});
+
+describe("deleteEntry", () => {
+  const base = [
+    { speaker: "田中", text: "こんにちは" },
+    { speaker: "鈴木", text: "よろしく" },
+    { speaker: "佐藤", text: "お疲れ様" },
+  ];
+
+  it("指定インデックスのエントリを除いた新しい配列を返す", () => {
+    const result = deleteEntry(base, 1);
+    expect(result).toEqual([
+      { speaker: "田中", text: "こんにちは" },
+      { speaker: "佐藤", text: "お疲れ様" },
+    ]);
+  });
+
+  it("先頭のエントリを削除できる", () => {
+    const result = deleteEntry(base, 0);
+    expect(result).toEqual([
+      { speaker: "鈴木", text: "よろしく" },
+      { speaker: "佐藤", text: "お疲れ様" },
+    ]);
+  });
+
+  it("末尾のエントリを削除できる", () => {
+    const result = deleteEntry(base, 2);
+    expect(result).toEqual([
+      { speaker: "田中", text: "こんにちは" },
+      { speaker: "鈴木", text: "よろしく" },
+    ]);
+  });
+
+  it("元の配列は変更されない（イミュータブル）", () => {
+    deleteEntry(base, 0);
+    expect(base).toHaveLength(3);
     expect(base[0].text).toBe("こんにちは");
   });
 });
