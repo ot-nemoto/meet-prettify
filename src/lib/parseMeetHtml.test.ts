@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdit, parseMeetHtml } from "./parseMeetHtml";
+import { addEntry, applyEdit, parseMeetHtml } from "./parseMeetHtml";
 
 // aria-label="字幕" 内に1件のエントリを持つ最小 HTML を生成するヘルパー
 function makeHtml(entries: { speaker: string; text: string }[]): string {
@@ -50,6 +50,59 @@ describe("applyEdit", () => {
 
   it("元の配列は変更されない（イミュータブル）", () => {
     applyEdit(base, 0, "変更後");
+    expect(base[0].text).toBe("こんにちは");
+  });
+});
+
+describe("addEntry", () => {
+  const base = [
+    { speaker: "田中", text: "こんにちは" },
+    { speaker: "鈴木", text: "よろしく" },
+  ];
+
+  it("insertAfterIndex が null の場合は末尾にエントリを追加した新しい配列を返す", () => {
+    const result = addEntry(base, { speaker: "佐藤", text: "失礼します" }, null);
+    expect(result).toEqual([
+      { speaker: "田中", text: "こんにちは" },
+      { speaker: "鈴木", text: "よろしく" },
+      { speaker: "佐藤", text: "失礼します" },
+    ]);
+  });
+
+  it("insertAfterIndex を指定した場合は指定インデックスの直後にエントリを挿入する", () => {
+    const result = addEntry(base, { speaker: "佐藤", text: "割り込みます" }, 0);
+    expect(result).toEqual([
+      { speaker: "田中", text: "こんにちは" },
+      { speaker: "佐藤", text: "割り込みます" },
+      { speaker: "鈴木", text: "よろしく" },
+    ]);
+  });
+
+  it("speaker と text の前後の余分な空白はトリムして保存する", () => {
+    const result = addEntry(base, { speaker: "  佐藤  ", text: "  こんにちは  " });
+    const added = result[result.length - 1];
+    expect(added.speaker).toBe("佐藤");
+    expect(added.text).toBe("こんにちは");
+  });
+
+  it("text が空白のみの場合は元の配列をそのまま返す", () => {
+    const result = addEntry(base, { speaker: "佐藤", text: "   " });
+    expect(result).toBe(base);
+  });
+
+  it("text が空文字列の場合は元の配列をそのまま返す", () => {
+    const result = addEntry(base, { speaker: "佐藤", text: "" });
+    expect(result).toBe(base);
+  });
+
+  it("speaker が空文字列でも text があれば追加できる", () => {
+    const result = addEntry(base, { speaker: "", text: "不明発言" });
+    expect(result[result.length - 1]).toEqual({ speaker: "", text: "不明発言" });
+  });
+
+  it("元の配列は変更されない（イミュータブル）", () => {
+    addEntry(base, { speaker: "佐藤", text: "追加" }, 0);
+    expect(base).toHaveLength(2);
     expect(base[0].text).toBe("こんにちは");
   });
 });

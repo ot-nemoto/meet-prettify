@@ -47,6 +47,28 @@ export function applyEdit(
   return entries.map((e, i) => (i === index ? { ...e, text: trimmed } : e));
 }
 
+/**
+ * 新しいエントリを insertAfterIndex の直後に挿入した新しい配列を返す。
+ * insertAfterIndex が null の場合は末尾に追加する。
+ * speaker または text がトリム後に空になる場合は元の配列をそのまま返す。
+ */
+export function addEntry(
+  entries: CaptionEntry[],
+  newEntry: CaptionEntry,
+  insertAfterIndex: number | null = null,
+): CaptionEntry[] {
+  const speaker = newEntry.speaker.trim();
+  const text = newEntry.text.trim();
+  if (!text) return entries;
+  const entry: CaptionEntry = { speaker, text };
+  if (insertAfterIndex === null) {
+    return [...entries, entry];
+  }
+  const result = [...entries];
+  result.splice(insertAfterIndex + 1, 0, entry);
+  return result;
+}
+
 function mergeConsecutiveSpeakers(entries: CaptionEntry[]): CaptionEntry[] {
   return entries.reduce<CaptionEntry[]>((acc, entry) => {
     const last = acc[acc.length - 1];
