@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMeetHtml } from "./parseMeetHtml";
+import { applyEdit, parseMeetHtml } from "./parseMeetHtml";
 
 // aria-label="字幕" 内に1件のエントリを持つ最小 HTML を生成するヘルパー
 function makeHtml(entries: { speaker: string; text: string }[]): string {
@@ -18,6 +18,41 @@ function makeHtml(entries: { speaker: string; text: string }[]): string {
     .join("");
   return `<div aria-label="字幕">${items}</div>`;
 }
+
+describe("applyEdit", () => {
+  const base = [
+    { speaker: "田中", text: "こんにちは" },
+    { speaker: "鈴木", text: "よろしく" },
+  ];
+
+  it("指定インデックスのテキストを更新した新しい配列を返す", () => {
+    const result = applyEdit(base, 0, "おはよう");
+    expect(result).toEqual([
+      { speaker: "田中", text: "おはよう" },
+      { speaker: "鈴木", text: "よろしく" },
+    ]);
+  });
+
+  it("前後の余分な空白はトリムして保存する", () => {
+    const result = applyEdit(base, 1, "  お疲れ様  ");
+    expect(result[1].text).toBe("お疲れ様");
+  });
+
+  it("空白のみのテキストを渡した場合は元の配列をそのまま返す", () => {
+    const result = applyEdit(base, 0, "   ");
+    expect(result).toBe(base); // 同一参照であることを確認
+  });
+
+  it("空文字列を渡した場合は元の配列をそのまま返す", () => {
+    const result = applyEdit(base, 0, "");
+    expect(result).toBe(base);
+  });
+
+  it("元の配列は変更されない（イミュータブル）", () => {
+    applyEdit(base, 0, "変更後");
+    expect(base[0].text).toBe("こんにちは");
+  });
+});
 
 describe("parseMeetHtml", () => {
   describe("正常系", () => {

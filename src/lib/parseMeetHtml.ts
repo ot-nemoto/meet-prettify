@@ -33,6 +33,20 @@ function parseByKnownSelectors(doc: Document): CaptionEntry[] {
   return entries;
 }
 
+/**
+ * 指定インデックスのエントリのテキストを更新した新しい配列を返す。
+ * newText がトリム後に空になる場合は元の配列をそのまま返す。
+ */
+export function applyEdit(
+  entries: CaptionEntry[],
+  index: number,
+  newText: string,
+): CaptionEntry[] {
+  const trimmed = newText.trim();
+  if (!trimmed) return entries;
+  return entries.map((e, i) => (i === index ? { ...e, text: trimmed } : e));
+}
+
 function mergeConsecutiveSpeakers(entries: CaptionEntry[]): CaptionEntry[] {
   return entries.reduce<CaptionEntry[]>((acc, entry) => {
     const last = acc[acc.length - 1];

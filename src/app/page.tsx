@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { parseMeetHtml, type CaptionEntry } from "@/lib/parseMeetHtml";
+import { applyEdit, parseMeetHtml, type CaptionEntry } from "@/lib/parseMeetHtml";
 
 type View = "input" | "result";
 
@@ -11,6 +11,8 @@ export default function Home() {
   const [entries, setEntries] = useState<CaptionEntry[]>([]);
   const [view, setView] = useState<View>("input");
   const [copied, setCopied] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
 
   const handleParse = () => {
     const result = parseMeetHtml(html);
@@ -21,6 +23,21 @@ export default function Home() {
   const handleReset = () => {
     setView("input");
     setEntries([]);
+    setEditingIndex(null);
+  };
+
+  const handleEditStart = (index: number, text: string) => {
+    setEditingIndex(index);
+    setEditingText(text);
+  };
+
+  const handleEditCommit = (index: number) => {
+    setEntries((prev) => applyEdit(prev, index, editingText));
+    setEditingIndex(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingIndex(null);
   };
 
   const toDisplayName = (speaker: string) =>
@@ -108,15 +125,62 @@ export default function Home() {
               <ul className="flex flex-col gap-4">
                 {entries.map((entry, i) => {
                   const displayName = toDisplayName(entry.speaker);
+                  const isEditing = editingIndex === i;
                   return (
                     // biome-ignore lint/suspicious/noArrayIndexKey: static list
                     <li key={i} className="flex flex-col items-start gap-1">
                       <span className="px-1 text-xs font-semibold text-gray-500">
                         {displayName}
                       </span>
-                      <div className="max-w-[75%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-gray-800 shadow-sm">
-                        {entry.text}
-                      </div>
+                      {isEditing ? (
+                        <div className="flex w-full max-w-[75%] flex-col gap-1">
+                          <textarea
+                            className="w-full rounded-2xl rounded-tl-sm border border-blue-400 bg-white px-4 py-2.5 text-sm leading-relaxed text-gray-800 shadow-sm focus:outline-none"
+                            // biome-ignore lint/a11y/noAutofocus: 編集開始時に即フォーカスする
+                            autoFocus
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleEditCommit(i);
+                              }
+                              if (e.key === "Escape") handleEditCancel();
+                            }}
+                            rows={Math.max(2, editingText.split("\n").length)}
+                          />
+                          <div className="flex gap-2 px-1">
+                            <button
+                              type="button"
+                              className="text-xs text-blue-600 hover:underline"
+                              onClick={() => handleEditCommit(i)}
+                            >
+                              保存
+                            </button>
+                            <button
+                              type="button"
+                              className="text-xs text-gray-400 hover:underline"
+                              onClick={handleEditCancel}
+                            >
+                              キャンセル
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="group relative max-w-[75%]">
+                          <div className="rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-gray-800 shadow-sm">
+                            {entry.text}
+                          </div>
+                          <button
+                            type="button"
+                            aria-label="編集"
+                            className="absolute -right-7 top-1/2 -translate-y-1/2 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+                            onClick={() => handleEditStart(i, entry.text)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </li>
                   );
                 })}
