@@ -5,11 +5,13 @@
 ```
 src/
 ├── app/
-│   ├── layout.tsx        # ルートレイアウト・メタデータ
-│   ├── page.tsx          # メインページ（UI・状態管理）
-│   └── globals.css       # グローバルスタイル（Tailwind）
+│   ├── layout.tsx             # ルートレイアウト・メタデータ
+│   ├── page.tsx               # メインページ（UI・状態管理）
+│   └── globals.css            # グローバルスタイル（Tailwind）
 └── lib/
-    └── parseMeetHtml.ts  # 字幕解析ロジック
+    ├── parseMeetHtml.ts       # 字幕解析ロジック
+    └── parseMeetHtml.test.ts  # 字幕解析ロジックの単体テスト
+vitest.config.ts               # Vitest 設定（jsdom 環境）
 ```
 
 ## データフロー
@@ -35,6 +37,28 @@ CaptionEntry[] を useState で保持（page.tsx）
 | `entries` | `CaptionEntry[]` | 解析結果 |
 | `view` | `"input" \| "result"` | 表示切り替え |
 | `copied` | `boolean` | Markdown コピー後のフィードバック表示 |
+
+## 発言者名の表示ロジック
+
+`page.tsx` の `toDisplayName(speaker)` 関数が、解析結果の `speaker` をUI表示用の名前に変換する。
+
+| `speaker` の値 | 表示名 |
+|---|---|
+| `"あなた"` | `myName` 入力フィールドの値（デフォルト: `"あなた"`） |
+| `""` (空文字列) | `"（不明）"` |
+| その他 | そのまま表示 |
+
+## Markdown コピー機能
+
+「Markdown をコピー」ボタンを押すと、以下の形式でクリップボードにコピーされる。
+
+```
+**{発言者名}: {テキスト}
+**{発言者名}: {テキスト}
+...
+```
+
+発言者名は `toDisplayName()` で変換した値が使用される。
 
 ## 設計方針
 

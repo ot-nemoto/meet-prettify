@@ -32,6 +32,16 @@ npm run lint      # リント
 npm run format    # フォーマット
 ```
 
+### テスト
+
+```bash
+npm run test          # 単体テストを実行
+npm run test:watch    # ウォッチモードで実行（開発中に便利）
+```
+
+テストフレームワークには **Vitest** を使用し、DOM 操作のテストには **jsdom** 環境を利用している。
+テスト対象は `src/lib/parseMeetHtml.ts`（字幕解析ロジック）。
+
 ---
 
 ## ビルド
