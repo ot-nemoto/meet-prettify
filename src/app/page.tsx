@@ -10,6 +10,7 @@ export default function Home() {
   const [myName, setMyName] = useState("あなた");
   const [entries, setEntries] = useState<CaptionEntry[]>([]);
   const [view, setView] = useState<View>("input");
+  const [copied, setCopied] = useState(false);
 
   const handleParse = () => {
     const result = parseMeetHtml(html);
@@ -20,6 +21,18 @@ export default function Home() {
   const handleReset = () => {
     setView("input");
     setEntries([]);
+  };
+
+  const toDisplayName = (speaker: string) =>
+    speaker === "あなた" ? myName : (speaker || "（不明）");
+
+  const handleCopyMarkdown = async () => {
+    const md = entries
+      .map((e) => `**${toDisplayName(e.speaker)}**: ${e.text}`)
+      .join("\n\n");
+    await navigator.clipboard.writeText(md);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -67,13 +80,24 @@ export default function Home() {
               <span className="text-sm text-gray-500">
                 {entries.length} 件の発言を抽出しました
               </span>
-              <button
-                type="button"
-                className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
-                onClick={handleReset}
-              >
-                戻る
-              </button>
+              <div className="flex gap-2">
+                {entries.length > 0 && (
+                  <button
+                    type="button"
+                    className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                    onClick={handleCopyMarkdown}
+                  >
+                    {copied ? "コピーしました" : "Markdown をコピー"}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                  onClick={handleReset}
+                >
+                  戻る
+                </button>
+              </div>
             </div>
 
             {entries.length === 0 ? (
@@ -83,7 +107,7 @@ export default function Home() {
             ) : (
               <ul className="flex flex-col gap-4">
                 {entries.map((entry, i) => {
-                  const displayName = entry.speaker === "あなた" ? myName : (entry.speaker || "（不明）");
+                  const displayName = toDisplayName(entry.speaker);
                   return (
                     // biome-ignore lint/suspicious/noArrayIndexKey: static list
                     <li key={i} className="flex flex-col items-start gap-1">
