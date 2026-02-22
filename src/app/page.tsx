@@ -7,6 +7,7 @@ type View = "input" | "result";
 
 export default function Home() {
   const [html, setHtml] = useState("");
+  const [myName, setMyName] = useState("あなた");
   const [entries, setEntries] = useState<CaptionEntry[]>([]);
   const [view, setView] = useState<View>("input");
 
@@ -33,6 +34,18 @@ export default function Home() {
             <p className="text-sm text-gray-500">
               Google Meet で字幕を有効にした状態のページ HTML を貼り付けてください。
             </p>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-500 whitespace-nowrap" htmlFor="my-name">
+                あなたの名前
+              </label>
+              <input
+                id="my-name"
+                type="text"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+                value={myName}
+                onChange={(e) => setMyName(e.target.value)}
+              />
+            </div>
             <textarea
               className="h-64 w-full rounded-lg border border-gray-300 bg-white p-3 font-mono text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
               placeholder="<!DOCTYPE html>..."
@@ -68,16 +81,21 @@ export default function Home() {
                 字幕データが見つかりませんでした。Google Meet で字幕を有効にした状態の HTML を貼り付けてください。
               </div>
             ) : (
-              <ul className="flex flex-col gap-3">
-                {entries.map((entry, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: static list
-                  <li key={i} className="rounded-lg bg-white p-4 shadow-sm">
-                    <span className="text-xs font-semibold text-blue-600">
-                      {entry.speaker || "（不明）"}
-                    </span>
-                    <p className="mt-1 text-sm text-gray-800">{entry.text}</p>
-                  </li>
-                ))}
+              <ul className="flex flex-col gap-4">
+                {entries.map((entry, i) => {
+                  const displayName = entry.speaker === "あなた" ? myName : (entry.speaker || "（不明）");
+                  return (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static list
+                    <li key={i} className="flex flex-col items-start gap-1">
+                      <span className="px-1 text-xs font-semibold text-gray-500">
+                        {displayName}
+                      </span>
+                      <div className="max-w-[75%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-gray-800 shadow-sm">
+                        {entry.text}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
