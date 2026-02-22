@@ -60,7 +60,7 @@ export function deleteEntry(
 /**
  * 新しいエントリを insertAfterIndex の直後に挿入した新しい配列を返す。
  * insertAfterIndex が null の場合は末尾に追加する。
- * speaker または text がトリム後に空になる場合は元の配列をそのまま返す。
+ * text がトリム後に空になる場合は元の配列をそのまま返す。
  */
 export function addEntry(
   entries: CaptionEntry[],
