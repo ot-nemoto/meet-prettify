@@ -49,7 +49,7 @@ function AddEntryForm({
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            onCommit();
+            if (text.trim()) onCommit();
           }
           if (e.key === "Escape") onCancel();
         }}
