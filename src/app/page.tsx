@@ -137,8 +137,23 @@ export default function Home() {
 
   const handleDelete = (index: number) => {
     setEntries((prev) => deleteEntry(prev, index));
-    if (editingIndex === index) setEditingIndex(null);
-    if (isAdding && addAfterIndex === index) setIsAdding(false);
+    setEditingIndex((prev) => {
+      if (prev === null) return null;
+      if (prev === index) return null;
+      if (prev > index) return prev - 1;
+      return prev;
+    });
+    if (isAdding) {
+      if (addAfterIndex === index) {
+        setIsAdding(false);
+      } else {
+        setAddAfterIndex((prev) => {
+          if (prev === null) return null;
+          if (prev > index) return prev - 1;
+          return prev;
+        });
+      }
+    }
   };
 
   const toDisplayName = (speaker: string) =>
